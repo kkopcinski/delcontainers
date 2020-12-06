@@ -1,0 +1,52 @@
+#!/bin/bash
+
+ACTION="stop"
+
+function usage() {
+    # Return usage information
+    echo "USAGE:	${0} [-nd]" >&2
+    echo "-n	DRY	Prints docker commands instead of executing them" >&2
+    echo "-d	DELETE	Deletes containers instead of stopping them" >&2
+    exit 1
+}
+
+# Parse commands
+while getopts nd OPTION
+do
+    case "${OPTION}" in
+	d)
+	    ACTION="rm -f"
+	    ;;
+	n)
+	    DRY='true'
+	    ;;
+	*)
+	    usage
+	    ;;
+    esac
+done
+
+if [[ "${UID}" -ne 0 ]]
+then
+    echo "Musisz uruchomić jako root" >&2
+    usage
+fi
+
+CONTAINERS=$(docker container ls -a | awk '{print $1}' | tail -n +2)
+
+while read -r CONTAINER; do
+    if [[ ${CONTAINER} == "" ]]
+    then
+	echo "No containers" >&2
+	exit 1
+    fi
+
+    if [[ "${DRY}" != 'true' ]]
+    then
+	docker container ${ACTION} "${CONTAINER}" 2> /dev/null
+    else
+	echo "docker container ${ACTION} ${CONTAINER}"
+    fi
+done <<< "${CONTAINERS}"
+
+exit 0
