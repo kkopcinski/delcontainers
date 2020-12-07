@@ -1,4 +1,4 @@
-# delcont
+# delcontainer
 
 Simple script, that stops or deletes all Docker containers.
 
