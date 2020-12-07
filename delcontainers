@@ -14,26 +14,23 @@ function usage() {
 while getopts nd OPTION
 do
     case "${OPTION}" in
-	d)
-	    ACTION="rm -f"
-	    ;;
-	n)
-	    DRY='true'
-	    ;;
-	*)
-	    usage
-	    ;;
+	d) ACTION="rm -f" ;;
+	n) DRY='true' ;;
+	*) usage ;;
     esac
 done
 
+# Check if root 
 if [[ "${UID}" -ne 0 ]]
 then
     echo "Musisz uruchomić jako root" >&2
     usage
 fi
 
+# Get list of all containers
 CONTAINERS=$(docker container ls -a | awk '{print $1}' | tail -n +2)
 
+# Execute requested action on containers
 while read -r CONTAINER; do
     if [[ ${CONTAINER} == "" ]]
     then
